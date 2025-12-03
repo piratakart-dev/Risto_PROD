@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or 'Risto Solution · Gestionale' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f6f6f6;
+        --sidebar: #2f343f;
+        --primary: #c8102e;
+        --accent: #a50f27;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --card: #ffffff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        min-height: 100vh;
+      }
+      aside {
+        background: var(--sidebar);
+        color: #f3f4f6;
+        padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        box-shadow: 6px 0 18px rgba(0, 0, 0, 0.08);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .brand img { width: 42px; height: 42px; object-fit: contain; }
+      nav ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+      nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      nav a.active, nav a:hover {
+        background: linear-gradient(120deg, rgba(200, 16, 46, 0.35), rgba(165, 15, 39, 0.45));
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.16);
+      }
+      main {
+        padding: 26px 32px;
+        display: grid;
+        gap: 18px;
+      }
+      .page-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+      .page-header h1 { margin: 0; font-size: 24px; }
+      .page-header p { margin: 0; color: var(--muted); }
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #fff;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 12px 26px rgba(200, 16, 46, 0.25);
+      }
+      .panel {
+        background: var(--card);
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        padding: 18px;
+        box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+      }
+      .grid-two {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+      .pill-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+      .pill { display: flex; align-items: center; gap: 10px; background: #f0f1f3; color: var(--text); padding: 12px; border-radius:12px; border:1px solid var(--border); }
+      .pill span { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 6px rgba(200,16,46,0.12); }
+      form.stack { display: grid; gap: 12px; }
+      .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+      label { font-weight: 600; font-size: 14px; color: var(--text); }
+      input, select, textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-size: 14px;
+      }
+      input:focus, select:focus, textarea:focus { outline: 2px solid rgba(200,16,46,0.22); border-color: var(--primary); }
+      .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+      .btn-secondary { border: 1px solid var(--border); background: #fff; padding: 12px 14px; border-radius: 10px; font-weight:700; color: var(--text); cursor: pointer; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+      th { color: var(--muted); font-weight: 700; font-size: 13px; }
+      td { font-size: 14px; color: var(--text); }
+      .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+      .badge.manager { background: rgba(200,16,46,0.12); color: #7f1024; }
+      .badge.user { background: rgba(55,65,81,0.12); color: #1f2937; }
+      .status-dot { width: 12px; height: 12px; border-radius: 50%; }
+      .status.active { background: #28c281; }
+      .status.inactive { background: #d97706; }
+      .status.blocked { background: #c8102e; }
+      .table-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+      .ghost-btn { border: 1px solid var(--border); background: #fff; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; color: var(--text); }
+      .ghost-btn.danger { color: #c8102e; border-color: #f5c6cb; }
+    .status-box { min-height: 24px; color: #c8102e; font-weight: 600; }
+    .filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .machine-card { border:1px solid var(--border); padding:12px; border-radius:10px; background:#fff; }
+    .machine-head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .machine-title { font-weight:700; color:var(--text); }
+    .file-list { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .file-chip { display:inline-flex; align-items:center; padding:6px 10px; background:#f9fafb; border:1px solid var(--border); border-radius:8px; text-decoration:none; color:var(--text); font-size:12px; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+    .user-chip { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:10px; font-weight:700; color:var(--text); }
+    @media (max-width: 960px) { .layout { grid-template-columns: 1fr; } aside { flex-direction: row; flex-wrap: wrap; gap: 10px; } nav ul { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); } }
+  </style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% set is_manager = session_user and session_user.get('role', '')|lower == 'manager' %}
+    <div class="layout">
+      <aside>
+        <div class="brand">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" />
+          <div>Risto Solution</div>
+        </div>
+        <nav>
+          <ul>
+            <li><a class="{{ 'active' if active_nav == 'clients' else '' }}" href="/clients/manage">Clienti</a></li>
+            {% if is_manager %}
+              <li><a class="{{ 'active' if active_nav == 'activities' else '' }}" href="/activities/manage">Gestione attività</a></li>
+              <li><a class="{{ 'active' if active_nav == 'users' else '' }}" href="/users/manage">Gestione utenti</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </aside>
+      <main>
+        <div class="topbar">
+          <div class="user-chip">
+            <span style="width:12px;height:12px;border-radius:50%;background:#c8102e;display:inline-block;"></span>
+            <span>{{ session_user.name if session_user else 'Utente' }}</span>
+            {% if session_user and session_user.role %}
+              <span class="badge {{ session_user.role }}">{{ session_user.role|capitalize }}</span>
+            {% endif %}
+          </div>
+          <button class="ghost-btn" id="logout-btn" type="button">Esci</button>
+        </div>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+    <script>
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          try {
+            await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+          } catch (_) {}
+          window.location.href = '/login';
+        });
+      }
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

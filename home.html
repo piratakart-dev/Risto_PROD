@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Risto Solution · Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --brand-primary: #0c1f38;
+        --brand-accent: #0fd2a1;
+        --brand-secondary: #1e88ff;
+        --surface: rgba(255, 255, 255, 0.04);
+        --glass: rgba(255, 255, 255, 0.06);
+        --text: #eaf1ff;
+        --muted: #93a8c5;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: radial-gradient(circle at 10% 20%, rgba(15, 210, 161, 0.18), transparent 25%),
+          radial-gradient(circle at 90% 10%, rgba(30, 136, 255, 0.18), transparent 25%),
+          linear-gradient(135deg, #0b1220 0%, #0f1627 30%, #0b1220 100%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px clamp(16px, 3vw, 32px);
+        position: sticky;
+        top: 0;
+        backdrop-filter: blur(14px);
+        background: linear-gradient(180deg, rgba(12, 31, 56, 0.9), rgba(12, 31, 56, 0.6));
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        z-index: 10;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: #fff;
+      }
+      .brand img {
+        width: 42px;
+        height: 42px;
+      }
+      .cta-group {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .btn {
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
+        background: transparent;
+      }
+      .btn.primary {
+        background: linear-gradient(120deg, var(--brand-secondary) 0%, var(--brand-accent) 100%);
+        box-shadow: 0 18px 40px rgba(15, 210, 161, 0.3);
+        border: none;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+      }
+      .hero {
+        width: min(1200px, 100%);
+        margin: 24px auto 0;
+        padding: clamp(20px, 4vw, 32px);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        align-items: stretch;
+      }
+      .hero-card {
+        background: var(--glass);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        padding: clamp(18px, 3vw, 28px);
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+      }
+      .hero-card h1 {
+        margin: 14px 0 8px;
+        font-size: clamp(30px, 4vw, 40px);
+        line-height: 1.2;
+      }
+      .hero-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .hero-badges {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+      .pill {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        font-weight: 600;
+        font-size: 13px;
+      }
+      .progress {
+        display: grid;
+        gap: 10px;
+        margin: 24px 0;
+      }
+      .progress-line {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .progress-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .progress-bar span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, var(--brand-secondary), var(--brand-accent));
+        width: 78%;
+      }
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .mini-card {
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 18px;
+        padding: 18px;
+        display: grid;
+        gap: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 46px rgba(0, 0, 0, 0.28);
+      }
+      .mini-card strong {
+        font-size: 16px;
+      }
+      .mini-card span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .features {
+        width: min(1200px, 100%);
+        margin: 8px auto 60px;
+        padding: 0 clamp(16px, 3vw, 32px);
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+      }
+      .feature-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 18px;
+        border-radius: 16px;
+        display: grid;
+        gap: 10px;
+        min-height: 160px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+      }
+      .feature-card h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+      .feature-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+      .feature-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(30, 136, 255, 0.14), rgba(15, 210, 161, 0.2));
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-weight: 700;
+      }
+      footer {
+        text-align: center;
+        padding: 22px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      @media (max-width: 720px) {
+        header {
+          position: static;
+        }
+        .hero {
+          margin-top: 12px;
+          padding: 16px;
+        }
+        .cta-row {
+          flex-direction: column;
+        }
+        .cta-group {
+          gap: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Risto Solution" />
+        <span>Risto Solution</span>
+      </div>
+      <div class="cta-group">
+        <a class="btn" href="{{ url_for('forgot_password_page') }}">Password dimenticata?</a>
+        <a class="btn primary" href="{{ url_for('login_page') }}">Accedi</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-card">
+          <div class="pill">Suite operativa · Risto Solution</div>
+          <h1>Benvenuto in Risto Solution</h1>
+          <p>
+            Accesso sicuro per gestire utenti, prodotti e processi operativi da desktop o smartphone.
+            Dashboard moderna, controlli granulari e password recovery integrato.
+          </p>
+          <div class="hero-badges">
+            <div class="pill">Ruoli manager & user</div>
+            <div class="pill">Compatibile mobile</div>
+            <div class="pill">Reset password rapido</div>
+          </div>
+          <div class="progress">
+            <div class="progress-line">
+              <span style="color: var(--muted); font-size: 14px;">Stato sicurezza</span>
+              <span style="font-weight: 700;">Avanzato</span>
+            </div>
+            <div class="progress-bar"><span></span></div>
+          </div>
+          <div class="cta-row">
+            <a class="btn primary" href="{{ url_for('login_page') }}">Accedi ora</a>
+            <a class="btn" href="{{ url_for('forgot_password_page') }}">Recupera password</a>
+          </div>
+        </div>
+        <div class="hero-card" style="display: grid; gap: 14px;">
+          <div class="mini-card">
+            <strong>Accesso protetto</strong>
+            <span>Login con e-mail personale e password crittografata.</span>
+          </div>
+          <div class="mini-card">
+            <strong>Gestione utenti</strong>
+            <span>Profilo completo con dati anagrafici e ruoli differenziati.</span>
+          </div>
+          <div class="mini-card">
+            <strong>Operatività rapida</strong>
+            <span>Processi ottimizzati per team in movimento su PC e smartphone.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>Login sicuro</h3>
+          <p>Autenticazione con hashing SHA-256 e validazione server-side per ogni accesso.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👥</div>
+          <h3>Ruoli dedicati</h3>
+          <p>Gestione distinta per manager e user con controlli coerenti alle policy aziendali.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3>Pronto per mobile</h3>
+          <p>Layout responsive ottimizzato per smartphone senza rinunciare alla chiarezza desktop.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <h3>Recupero veloce</h3>
+          <p>Reset password integrato per assistere gli utenti senza ticket manuali.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>Risto Solution · Operatività moderna e sicura</footer>
+  </body>
+</html>

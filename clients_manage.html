@@ -1,0 +1,549 @@
+{% extends 'dashboard_base.html' %}
+{% set title = 'Clienti' %}
+{% block extra_head %}
+  <style>
+    .panel h3 { color: #111827; }
+    .upload-zone {
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 12px;
+      background: #f9fafb;
+      display: grid;
+      gap: 4px;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .upload-zone:hover { border-color: #c8102e; background: #fff; }
+    .upload-zone strong { color: #c8102e; }
+    .file-thumb {
+      width: 90px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+    }
+    .file-name { font-weight: 700; font-size: 12px; }
+    .file-chip img { margin-right: 8px; }
+    .file-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 12px;
+    }
+    .file-chip .file-ext {
+      background: #c8102e;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 10px;
+    }
+    .inline-upload { margin-top: 10px; }
+    table tbody tr { transition: background 0.2s ease; }
+    table tbody tr:hover { background: #f9fafb; }
+    .table-actions button { min-width: 92px; }
+  </style>
+{% endblock %}
+{% block content %}
+  <div class="page-header">
+    <div>
+      <h1>Clienti</h1>
+      <p>Gestione anagrafiche e macchinari, anche da smartphone</p>
+    </div>
+    <button class="btn-primary" id="new-client">+ Nuovo Cliente</button>
+  </div>
+
+  <div class="panel">
+    <div class="filters">
+      <input id="search" type="search" placeholder="Cerca per nome o email" />
+    </div>
+    <div style="overflow:auto;">
+      <table id="clients-table">
+        <thead>
+          <tr>
+            <th>Nome Cliente</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Indirizzo</th>
+            <th>Macchinari</th>
+            <th>Azioni</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid-two">
+    <div class="panel">
+      <h3 style="margin-top:0;" id="client-form-title">Nuovo Cliente</h3>
+      <form id="client-form" class="stack" novalidate>
+        <input type="hidden" id="client-id" />
+        <div class="row">
+          <div>
+            <label for="client-name">Nome*</label>
+            <input id="client-name" required />
+          </div>
+          <div>
+            <label for="client-phone">Telefono</label>
+            <input id="client-phone" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="client-email">Email</label>
+            <input id="client-email" type="email" />
+          </div>
+          <div>
+            <label for="client-city">Città</label>
+            <input id="client-city" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="full">
+            <label for="client-address">Indirizzo</label>
+            <input id="client-address" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="full">
+            <label for="client-notes">Note</label>
+            <textarea id="client-notes" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn-primary" id="client-submit">Salva Cliente</button>
+          <button type="button" class="btn-secondary" id="client-reset">Annulla</button>
+        </div>
+        <div id="client-status" class="status-box" aria-live="polite"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="page-header" style="padding:0 0 8px 0;">
+        <div>
+          <h3 style="margin:0;">Macchinari</h3>
+          <p id="machine-helper" style="margin:4px 0 0;">Seleziona un cliente per aggiungere macchinari e allegati</p>
+        </div>
+        <button class="btn-secondary" id="add-machine" disabled>+ Aggiungi Macchinario</button>
+      </div>
+      <div id="machine-form-wrapper" class="stack" style="display:none;">
+        <form id="machine-form" class="stack" enctype="multipart/form-data">
+          <input type="hidden" id="machine-id" />
+          <div class="row">
+            <div>
+              <label for="machine-brand">Marca*</label>
+              <input id="machine-brand" required />
+            </div>
+            <div>
+              <label for="machine-model">Modello*</label>
+              <input id="machine-model" required />
+            </div>
+          </div>
+          <div class="row">
+            <div class="full">
+              <label for="machine-notes">Note</label>
+              <textarea id="machine-notes" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="row">
+            <div class="full">
+              <label for="machine-files">Allegati (foto o documenti)</label>
+              <label class="upload-zone" for="machine-files">
+                <strong>Tocca o trascina</strong> per scattare una foto o scegliere dalla galleria
+                <small>PDF, JPG, PNG, HEIC. Puoi allegare più file.</small>
+              </label>
+              <input id="machine-files" type="file" multiple accept="image/*,.pdf,.doc,.docx,.png,.jpg,.jpeg,.heic" style="display:none" />
+          </div>
+        </div>
+          <div class="actions">
+            <button type="submit" class="btn-primary">Salva Macchinario</button>
+            <button type="button" class="btn-secondary" id="machine-cancel">Annulla</button>
+          </div>
+        </form>
+      </div>
+      <div id="machines-list" class="stack" style="margin-top:12px;"></div>
+    </div>
+  </div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  const clientsTableBody = document.querySelector('#clients-table tbody');
+  const searchInput = document.getElementById('search');
+  const clientForm = document.getElementById('client-form');
+  const clientStatus = document.getElementById('client-status');
+  const clientReset = document.getElementById('client-reset');
+  const clientSubmit = document.getElementById('client-submit');
+  const newClientBtn = document.getElementById('new-client');
+  const machinesList = document.getElementById('machines-list');
+  const machineHelper = document.getElementById('machine-helper');
+  const addMachineBtn = document.getElementById('add-machine');
+  const machineFormWrapper = document.getElementById('machine-form-wrapper');
+  const machineForm = document.getElementById('machine-form');
+  const machineFiles = document.getElementById('machine-files');
+  const machineCancel = document.getElementById('machine-cancel');
+  const machineSubmit = machineForm.querySelector('button[type="submit"]');
+
+  let clients = [];
+  let filteredClients = [];
+  let selectedClientId = null;
+  let editingMachineId = null;
+
+  function renderClientStatus(message, type = 'error') {
+    clientStatus.textContent = message;
+    clientStatus.style.color = type === 'error' ? '#c8102e' : '#0f5132';
+  }
+
+  function clearClientForm() {
+    clientForm.reset();
+    document.getElementById('client-id').value = '';
+    document.getElementById('client-form-title').textContent = 'Nuovo Cliente';
+    clientSubmit.textContent = 'Salva Cliente';
+  }
+
+  function clearMachineForm() {
+    machineForm.reset();
+    document.getElementById('machine-id').value = '';
+    machineSubmit.textContent = 'Salva Macchinario';
+    editingMachineId = null;
+  }
+
+  function renderRow(client) {
+    const tr = document.createElement('tr');
+    tr.dataset.id = client.id;
+    tr.innerHTML = `
+      <td>${client.name || '-'}<div class="muted">${client.notes || ''}</div></td>
+      <td>${client.phone || '-'}</td>
+      <td>${client.email || '-'}</td>
+      <td>${client.address || ''}</td>
+      <td><strong>${client.machines_count || 0}</strong></td>
+      <td class="table-actions">
+        <button class="ghost-btn" data-action="edit">Modifica</button>
+        <button class="ghost-btn danger" data-action="delete">Elimina</button>
+      </td>`;
+    return tr;
+  }
+
+  function renderClients(list) {
+    clientsTableBody.innerHTML = '';
+    if (!list.length) {
+      const empty = document.createElement('tr');
+      empty.innerHTML = '<td colspan="6" class="muted">Nessun cliente</td>';
+      clientsTableBody.appendChild(empty);
+      return;
+    }
+    list.forEach((c) => clientsTableBody.appendChild(renderRow(c)));
+  }
+
+  function filterClients() {
+    const term = searchInput.value.toLowerCase();
+    filteredClients = clients.filter((c) =>
+      (c.name || '').toLowerCase().includes(term) || (c.email || '').toLowerCase().includes(term)
+    );
+    renderClients(filteredClients);
+  }
+
+  async function fetchClients() {
+    try {
+      const response = await fetch('/clients', { credentials: 'include' });
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      clients = data || [];
+      filteredClients = clients;
+      renderClients(clients);
+    } catch (error) {
+      renderClientStatus('Impossibile caricare i clienti, verifica l\'accesso.');
+    }
+  }
+
+  function populateClientForm(client) {
+    document.getElementById('client-id').value = client.id;
+    document.getElementById('client-name').value = client.name || '';
+    document.getElementById('client-phone').value = client.phone || '';
+    document.getElementById('client-email').value = client.email || '';
+    document.getElementById('client-address').value = client.address || '';
+    document.getElementById('client-city').value = client.city || '';
+    document.getElementById('client-notes').value = client.notes || '';
+    document.getElementById('client-form-title').textContent = 'Modifica Cliente';
+    clientSubmit.textContent = 'Aggiorna Cliente';
+  }
+
+  function renderFiles(files = []) {
+    if (!files.length) return '<div class="muted">Nessun allegato</div>';
+    return `
+      <div class="file-list">
+        ${files
+          .map((file) => {
+            const name = file.original_name || file.file_path;
+            const url = `/uploads/${file.file_path}`;
+            const isImage = /\.(png|jpe?g|heic|webp|gif)$/i.test(name);
+            const thumb = isImage ? `<img src="${url}" class="file-thumb" alt="${name}" />` : `<span class="file-ext">${(name.split('.').pop() || '').toUpperCase()}</span>`;
+            return `<a class="file-chip" href="${url}" target="_blank" rel="noopener">${thumb}<span class="file-name">${name}</span></a>`;
+          })
+          .join('')}
+      </div>
+    `;
+  }
+
+  function renderMachines(machines = []) {
+    machinesList.innerHTML = '';
+    if (!machines.length) {
+      machinesList.innerHTML = '<div class="muted">Nessun macchinario registrato.</div>';
+      return;
+    }
+    machines.forEach((machine) => {
+      const card = document.createElement('div');
+      card.className = 'machine-card';
+      card.innerHTML = `
+        <div class="machine-head">
+          <div>
+            <div class="machine-title">${machine.brand || ''} ${machine.model || ''}</div>
+            <div class="muted">${machine.notes || ''}</div>
+          </div>
+          <div class="table-actions">
+            <button class="ghost-btn" data-id="${machine.id}" data-action="edit">Modifica</button>
+            <button class="ghost-btn danger" data-id="${machine.id}" data-action="remove">Elimina</button>
+          </div>
+        </div>
+        ${renderFiles(machine.files)}
+        <div class="inline-upload">
+          <label class="upload-zone" for="inline-upload-${machine.id}">
+            <strong>Carica foto o documenti</strong>
+            <small>Scatta da smartphone o scegli dalla galleria</small>
+          </label>
+          <input class="machine-inline-input" data-machine-id="${machine.id}" id="inline-upload-${machine.id}" type="file" multiple accept="image/*,.pdf,.doc,.docx,.png,.jpg,.jpeg,.heic" style="display:none" />
+        </div>
+      `;
+      machinesList.appendChild(card);
+    });
+  }
+
+  async function loadClientDetail(clientId) {
+    try {
+      const response = await fetch(`/clients/${clientId}`, { credentials: 'include' });
+      const data = await response.json();
+      if (!response.ok) throw new Error();
+      selectedClientId = clientId;
+      populateClientForm(data);
+      renderMachines(data.machines || []);
+      addMachineBtn.disabled = false;
+      machineHelper.textContent = `Macchinari associati a ${data.name}`;
+    } catch (_) {
+      renderClientStatus('Impossibile recuperare il cliente');
+    }
+  }
+
+  clientsTableBody.addEventListener('click', async (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const row = button.closest('tr');
+    const clientId = row?.dataset.id;
+    if (!clientId) return;
+    const action = button.dataset.action;
+    if (action === 'edit') {
+      loadClientDetail(clientId);
+    }
+    if (action === 'delete') {
+      if (!confirm('Eliminare il cliente selezionato?')) return;
+      try {
+        const response = await fetch(`/clients/${clientId}`, { method: 'DELETE', credentials: 'include' });
+        if (!response.ok) throw new Error();
+        renderClientStatus('Cliente eliminato', 'success');
+        fetchClients();
+        machinesList.innerHTML = '';
+        machineHelper.textContent = 'Seleziona un cliente per aggiungere macchinari e allegati';
+        addMachineBtn.disabled = true;
+        clearClientForm();
+      } catch (_) {
+        renderClientStatus('Impossibile eliminare il cliente');
+      }
+    }
+  });
+
+  clientForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    renderClientStatus('');
+    const payload = {
+      name: document.getElementById('client-name').value.trim(),
+      phone: document.getElementById('client-phone').value.trim(),
+      email: document.getElementById('client-email').value.trim(),
+      address: document.getElementById('client-address').value.trim(),
+      city: document.getElementById('client-city').value.trim(),
+      notes: document.getElementById('client-notes').value.trim(),
+    };
+    if (!payload.name) {
+      renderClientStatus('Inserisci il nome del cliente');
+      return;
+    }
+    const clientId = document.getElementById('client-id').value;
+    const url = clientId ? `/clients/${clientId}` : '/clients';
+    const method = clientId ? 'PUT' : 'POST';
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        renderClientStatus(data.error || 'Errore durante il salvataggio');
+        return;
+      }
+      renderClientStatus('Cliente salvato', 'success');
+      fetchClients();
+      if (!clientId && data?.id) {
+        loadClientDetail(data.id);
+      }
+    } catch (_) {
+      renderClientStatus('Errore di rete durante il salvataggio');
+    }
+  });
+
+  clientReset.addEventListener('click', () => {
+    clearClientForm();
+    renderClientStatus('');
+  });
+
+  newClientBtn.addEventListener('click', () => {
+    selectedClientId = null;
+    clearClientForm();
+    clearMachineForm();
+    machineHelper.textContent = 'Seleziona un cliente per aggiungere macchinari e allegati';
+    addMachineBtn.disabled = true;
+    machinesList.innerHTML = '';
+    clientForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  addMachineBtn.addEventListener('click', () => {
+    if (!selectedClientId) return;
+    clearMachineForm();
+    machineFormWrapper.style.display = 'block';
+  });
+
+  machineCancel.addEventListener('click', () => {
+    clearMachineForm();
+    machineFormWrapper.style.display = 'none';
+  });
+
+  machineForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!selectedClientId) {
+      renderClientStatus('Seleziona prima un cliente');
+      return;
+    }
+    const brand = document.getElementById('machine-brand').value.trim();
+    const model = document.getElementById('machine-model').value.trim();
+    if (!brand || !model) {
+      renderClientStatus('Marca e modello sono obbligatori');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('brand', brand);
+    formData.append('model', model);
+    formData.append('notes', document.getElementById('machine-notes').value.trim());
+    for (const file of machineFiles.files || []) {
+      formData.append('files', file);
+    }
+    const url = editingMachineId
+      ? `/clients/${selectedClientId}/machines/${editingMachineId}`
+      : `/clients/${selectedClientId}/machines`;
+    try {
+      const response = await fetch(url, {
+        method: editingMachineId ? 'PUT' : 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        renderClientStatus(data.error || 'Errore nel salvataggio del macchinario');
+        return;
+      }
+      renderClientStatus('Macchinario salvato', 'success');
+      clearMachineForm();
+      machineFormWrapper.style.display = 'none';
+      loadClientDetail(selectedClientId);
+    } catch (_) {
+      renderClientStatus('Errore di rete durante il salvataggio');
+    }
+  });
+
+  machinesList.addEventListener('click', async (event) => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const machineId = button.dataset.id;
+    if (button.dataset.action === 'remove' && machineId && selectedClientId) {
+      if (!confirm('Vuoi eliminare questo macchinario?')) return;
+      const response = await fetch(`/clients/${selectedClientId}/machines/${machineId}`, { method: 'DELETE', credentials: 'include' });
+      if (!response.ok) {
+        renderClientStatus('Impossibile eliminare il macchinario');
+        return;
+      }
+      loadClientDetail(selectedClientId);
+    }
+    if (button.dataset.action === 'edit' && machineId && selectedClientId) {
+      const client = clients.find((c) => c.id == selectedClientId);
+      const machine = client?.machines?.find((m) => m.id == machineId);
+      if (!machine) {
+        try {
+          const response = await fetch(`/clients/${selectedClientId}` , { credentials: 'include' });
+          const data = await response.json();
+          if (response.ok) {
+            const found = (data.machines || []).find((m) => m.id == machineId);
+            if (found) {
+              populateMachineForm(found);
+            }
+          }
+        } catch (_) {}
+      } else {
+        populateMachineForm(machine);
+      }
+    }
+  });
+
+  function populateMachineForm(machine) {
+    document.getElementById('machine-brand').value = machine.brand || '';
+    document.getElementById('machine-model').value = machine.model || '';
+    document.getElementById('machine-notes').value = machine.notes || '';
+    editingMachineId = machine.id;
+    machineSubmit.textContent = 'Aggiorna Macchinario';
+    machineFormWrapper.style.display = 'block';
+    machineForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  machinesList.addEventListener('change', async (event) => {
+    const input = event.target.closest('.machine-inline-input');
+    if (!input || !input.files.length || !selectedClientId) return;
+    const machineId = input.dataset.machineId;
+    const formData = new FormData();
+    for (const file of input.files) {
+      formData.append('files', file);
+    }
+    try {
+      const response = await fetch(`/clients/${selectedClientId}/machines/${machineId}/files`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Upload fallito');
+      renderClientStatus('Allegati caricati', 'success');
+      loadClientDetail(selectedClientId);
+    } catch (_) {
+      renderClientStatus('Impossibile caricare gli allegati');
+    } finally {
+      input.value = '';
+    }
+  });
+
+  searchInput.addEventListener('input', filterClients);
+  fetchClients();
+</script>
+{% endblock %}

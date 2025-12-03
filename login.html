@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% set hero_title = 'Accedi' %}
+{% set hero_text = 'Inserisci email aziendale e password' %}
+{% block content %}
+  <form id="login-form" class="stack" novalidate>
+    <div class="input-group">
+      <div class="input-label">Email aziendale</div>
+      <div class="field-wrapper">
+        <input id="email" name="email" type="email" placeholder="nome.cognome@azienda.ch" required />
+      </div>
+    </div>
+    <div class="input-group">
+      <div class="input-label">Password</div>
+      <div class="field-wrapper">
+        <input id="password" name="password" type="password" placeholder="••••••••" minlength="6" required />
+        <button type="button" class="password-toggle" aria-label="Mostra o nascondi password">Mostra</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="primary">Accedi</button>
+      <p class="helper">Hai dimenticato la password? <a class="link" href="{{ url_for('forgot_password_page') }}">Recuperala qui</a>.</p>
+    </div>
+  </form>
+  <div id="login-status" class="status" aria-live="polite"></div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  const form = document.getElementById('login-form');
+  const statusBox = document.getElementById('login-status');
+  const togglePassword = document.querySelector('.password-toggle');
+  const passwordInput = document.getElementById('password');
+
+  togglePassword.addEventListener('click', () => {
+    const isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    togglePassword.textContent = isPassword ? 'Nascondi' : 'Mostra';
+    passwordInput.focus();
+  });
+
+  function renderStatus(message, type = 'success') {
+    if (!message) { statusBox.innerHTML = ''; return; }
+    statusBox.innerHTML = `<div class="alert alert--${type === 'error' ? 'error' : 'success'}">${message}</div>`;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    renderStatus('');
+    const payload = {
+      personal_email: form.email.value.trim(),
+      password: form.password.value,
+    };
+    try {
+      const response = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        renderStatus(data.error || 'Credenziali non valide', 'error');
+        return;
+      }
+      const target = data.redirect || '/clients/manage';
+      renderStatus('Accesso riuscito. Reindirizzamento in corso...');
+      setTimeout(() => { window.location.href = target; }, 200);
+    } catch (error) {
+      renderStatus('Errore di rete. Riprova più tardi.', 'error');
+    }
+  });
+</script>
+{% endblock %}
